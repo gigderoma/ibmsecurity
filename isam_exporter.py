@@ -100,26 +100,25 @@ class JsonCollector(object):
         p(ibmsecurity.isam.base.snmp_monitoring.get(isamAppliance=isam_server))
         # Set the V2 SNMP monitoring
         p(ibmsecurity.isam.base.snmp_monitoring.set_v1v2(isamAppliance=isam_server, community="IBM"))
-        # Commit or Deploy the changes
+			
+		p(ibmsecurity.isam.web.reverse_proxy.get_all(isamAppliance=isam_server,instance_id="base"))
+        
 
         
-        status = 'running'
-        url = isam_host + '/api/v1/executions?status=' + status + '&parent=null'
-        r = requests.get(url, headers=headers, verify=False)
+        
+        r = ibmsecurity.isam.web.reverse_proxy.get_all(isamAppliance=isam_server,instance_id="base")
         metric = Metric('jobs_running', 'Current Jobs Running', 'gauge')
         metric.add_sample('jobs_running', value=float(len(r.json())), labels={})
         yield metric
 
         status = 'failed'
-        url = isam_host + '/api/v1/executions?status=' + status + '&parent=null'
-        r = requests.get(url, headers=headers, verify=False)
+       
         metric = Metric('jobs_failed', 'Number of failed jobs', 'gauge')
         metric.add_sample('jobs_failed', value=float(len(r.json())), labels={})
         yield metric
 
         status = 'succeeded'
-        url = isam_host + '/api/v1/executions?status=' + status + '&parent=null'
-        r = requests.get(url, headers=headers, verify=False)
+        
         metric = Metric('jobs_succeeded', 'Number of failed jobs', 'gauge')
         metric.add_sample('jobs_succeeded', value=float(len(r.json())), labels={})
         yield metric
